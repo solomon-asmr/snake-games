@@ -17,6 +17,7 @@ let dy = 0;
 let foodX;
 let foodY;
 
+
 function main() {
     if (hasGameEnded()) return;
     setTimeout(function onTick() {
