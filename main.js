@@ -1,10 +1,10 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('gameCanvas'); // Get the canvas element
+const ctx = canvas.getContext('2d'); // Get the 2D rendering context
 canvas.width = 400;
 canvas.height = 400;
 
 let score = 0;
-const scoreDisplay = document.getElementById('score');
+const scoreDisplay = document.getElementById('score'); // Get the score display element
 
 // Initial snake segments
 const snake = [
@@ -14,7 +14,7 @@ const snake = [
 ];
 
 let dx = 20; // Horizontal velocity
-let dy = 0; // Vertical velocity
+let dy = 0;  // Vertical velocity
 let foodX;
 let foodY;
 let bonusFoodX;
@@ -24,7 +24,7 @@ let bonusFoodExists = false;
 let gameSpeed = 100; // Initial game speed in milliseconds
 
 // Main game loop
-function main() {
+function render() {
     if (hasGameEnded()) return;
     setTimeout(function onTick() {
         clearCanvas();
@@ -34,7 +34,7 @@ function main() {
         }
         moveSnake();
         drawSnake();
-        main();
+        render();
     }, gameSpeed);
 }
 
@@ -44,6 +44,7 @@ function clearCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+// Draw the snake with rounded segments
 // Draw the snake
 function drawSnake() {
     snake.forEach(part => {
@@ -53,10 +54,11 @@ function drawSnake() {
     });
 }
 
+
 // Move the snake
 function moveSnake() {
-    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-    snake.unshift(head);
+    const head = {x: snake[0].x + dx, y: snake[0].y + dy}; // Calculate new head position
+    snake.unshift(head); // Add new head to the front of the snake
     
     const hasEatenFood = Math.abs(snake[0].x - foodX) < 20 && Math.abs(snake[0].y - foodY) < 20;
     const hasEatenBonusFood = bonusFoodExists && Math.abs(snake[0].x - bonusFoodX) < 40 && Math.abs(snake[0].y - bonusFoodY) < 40;
@@ -76,7 +78,7 @@ function moveSnake() {
         bonusFoodExists = false;
         gameSpeed = Math.max(10, gameSpeed * 0.8); // Increase speed by 20%
     } else {
-        snake.pop();
+        snake.pop(); // Remove the last part of the snake
     }
 
     // Check for wall hit and wrap around
@@ -123,18 +125,24 @@ function createBonusFood() {
     bonusFoodExists = true;
 }
 
-// Draw the regular food
+// Draw the regular food as a circle
 function drawFood() {
     ctx.fillStyle = 'red';
-    ctx.fillRect(foodX, foodY, 20, 20);
-    ctx.strokeRect(foodX, foodY, 20, 20);
+    ctx.strokeStyle = 'darkred';
+    ctx.beginPath();
+    ctx.arc(foodX + 10, foodY + 10, 10, 0, 2 * Math.PI); // Draw circle for regular food
+    ctx.fill();
+    ctx.stroke();
 }
 
-// Draw the bonus food
+// Draw the bonus food as a larger circle
 function drawBonusFood() {
     ctx.fillStyle = 'red';
-    ctx.fillRect(bonusFoodX, bonusFoodY, 40, 40);
-    ctx.strokeRect(bonusFoodX, bonusFoodY, 40, 40);
+    ctx.strokeStyle = 'darkred';
+    ctx.beginPath();
+    ctx.arc(bonusFoodX + 20, bonusFoodY + 20, 20, 0, 2 * Math.PI); // Draw larger circle for bonus food
+    ctx.fill();
+    ctx.stroke();
 }
 
 // Handle direction change
@@ -172,4 +180,4 @@ function changeDirection(event) {
 
 // Initialize the game
 createFood();
-main();
+render();
