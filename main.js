@@ -8,7 +8,7 @@ const scoreDisplay = document.getElementById('score'); // Get the score display 
 
 // Initial snake segments
 const snake = [
-    {x: 160, y: 160},
+    {x: 160, y: 160},//This is the head of the snake
     {x: 140, y: 160},
     {x: 120, y: 160}
 ];
@@ -23,10 +23,10 @@ let foodsEaten = 0;
 let bonusFoodExists = false;
 let gameSpeed = 100; // Initial game speed in milliseconds
 
-// Main game loop
+// the main game render loop
 function render() {
     if (hasGameEnded()) return;
-    setTimeout(function onTick() {
+    setTimeout(()=> {
         clearCanvas();
         drawFood();
         if (bonusFoodExists) {
