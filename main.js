@@ -6,34 +6,45 @@ canvas.height = 400;
 let score = 0;
 const scoreDisplay = document.getElementById('score');
 
+// Initial snake segments
 const snake = [
     {x: 160, y: 160},
     {x: 140, y: 160},
     {x: 120, y: 160}
 ];
 
-let dx = 20;
-let dy = 0;
+let dx = 20; // Horizontal velocity
+let dy = 0; // Vertical velocity
 let foodX;
 let foodY;
+let bonusFoodX;
+let bonusFoodY;
+let foodsEaten = 0;
+let bonusFoodExists = false;
+let gameSpeed = 100; // Initial game speed in milliseconds
 
-
+// Main game loop
 function main() {
     if (hasGameEnded()) return;
     setTimeout(function onTick() {
         clearCanvas();
         drawFood();
+        if (bonusFoodExists) {
+            drawBonusFood();
+        }
         moveSnake();
         drawSnake();
         main();
-    }, 100);
+    }, gameSpeed);
 }
 
+// Clear the canvas
 function clearCanvas() {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+// Draw the snake
 function drawSnake() {
     snake.forEach(part => {
         ctx.fillStyle = 'green';
@@ -42,20 +53,33 @@ function drawSnake() {
     });
 }
 
+// Move the snake
 function moveSnake() {
     const head = {x: snake[0].x + dx, y: snake[0].y + dy};
     snake.unshift(head);
     
-    const hasEatenFood = snake[0].x === foodX && snake[0].y === foodY;
+    const hasEatenFood = Math.abs(snake[0].x - foodX) < 20 && Math.abs(snake[0].y - foodY) < 20;
+    const hasEatenBonusFood = bonusFoodExists && Math.abs(snake[0].x - bonusFoodX) < 40 && Math.abs(snake[0].y - bonusFoodY) < 40;
+
     if (hasEatenFood) {
         score += 10;
         scoreDisplay.textContent = 'Score: ' + score;
         createFood();
+        foodsEaten += 1;
+
+        if (foodsEaten % 5 === 0) {
+            createBonusFood();
+        }
+    } else if (hasEatenBonusFood) {
+        score += 20;
+        scoreDisplay.textContent = 'Score: ' + score;
+        bonusFoodExists = false;
+        gameSpeed = Math.max(10, gameSpeed * 0.8); // Increase speed by 20%
     } else {
         snake.pop();
     }
 
-    // Check for wall hit
+    // Check for wall hit and wrap around
     if (snake[0].x < 0) {
         snake[0].x = canvas.width - 20;
     } else if (snake[0].x >= canvas.width) {
@@ -67,6 +91,7 @@ function moveSnake() {
     }
 }
 
+// Check if the game has ended (snake collides with itself)
 function hasGameEnded() {
     for (let i = 4; i < snake.length; i++) {
         if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
@@ -74,10 +99,12 @@ function hasGameEnded() {
     return false;
 }
 
+// Generate random food coordinates
 function randomFood(min, max) {
     return Math.round((Math.random() * (max-min) + min) / 20) * 20;
 }
 
+// Create new food at random location
 function createFood() {
     foodX = randomFood(0, canvas.width - 20);
     foodY = randomFood(0, canvas.height - 20);
@@ -86,13 +113,32 @@ function createFood() {
     });
 }
 
+// Create new bonus food at random location
+function createBonusFood() {
+    bonusFoodX = randomFood(0, canvas.width - 40);
+    bonusFoodY = randomFood(0, canvas.height - 40);
+    snake.forEach(part => {
+        if (part.x == bonusFoodX && part.y == bonusFoodY) createBonusFood();
+    });
+    bonusFoodExists = true;
+}
+
+// Draw the regular food
 function drawFood() {
     ctx.fillStyle = 'red';
     ctx.fillRect(foodX, foodY, 20, 20);
     ctx.strokeRect(foodX, foodY, 20, 20);
 }
 
-document.addEventListener('keydown', changeDirection);
+// Draw the bonus food
+function drawBonusFood() {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(bonusFoodX, bonusFoodY, 40, 40);
+    ctx.strokeRect(bonusFoodX, bonusFoodY, 40, 40);
+}
+
+// Handle direction change
+document.onkeydown = changeDirection;
 
 function changeDirection(event) {
     const LEFT_KEY = 37;
@@ -124,5 +170,6 @@ function changeDirection(event) {
     }
 }
 
+// Initialize the game
 createFood();
 main();
